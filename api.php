@@ -1,74 +1,63 @@
 <?php
-ini_set('display_errors', 0);
-error_reporting(0);
-
-header('Content-Type: application/json; charset=utf-8');
+header('Content-Type: application/json');
 
 try {
-    $input = isset($_GET['q']) ? trim($_GET['q']) : '';
-    if (empty($input)) {
-        throw new Exception('Input IP atau domain harus diisi', 400);
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        throw new Exception("Invalid request method", 405);
     }
 
-    // Validasi input
-    $ip = filter_var($input, FILTER_VALIDATE_IP) ? $input : gethostbyname($input);
-    if (!$ip || ($ip === $input && !filter_var($input, FILTER_VALIDATE_IP))) {
-        throw new Exception('Input bukan IP/domain valid', 400);
+    if (!isset($_POST['input']) || empty($_POST['input'])) {
+        throw new Exception("Input is required", 400);
     }
 
-    // Context dengan user-agent + timeout
-    $options = [
-        'http' => [
-            'method'  => 'GET',
-            'header'  => "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
-                       . "(KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36\r\n",
-            'timeout' => 10
+    $input = trim($_POST['input']);
+
+    // kasi validasi user input domain ato ip ler
+    if (filter_var($input, FILTER_VALIDATE_IP)) {
+        $url = "https://otx.alienvault.com/api/v1/indicators/IPv4/{$input}/passive_dns";
+    } else {
+        $url = "https://otx.alienvault.com/api/v1/indicators/domain/{$input}/passive_dns";
+    }
+
+    $ch = curl_init();
+    curl_setopt_array($ch, [
+        CURLOPT_URL => $url,
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_HTTPGET => true,
+        CURLOPT_HTTPHEADER => [
+            "Accept: application/json",
+            "User-Agent: Reverse-IP-Tool"
         ]
-    ];
-    $context = stream_context_create($options);
+    ]);
 
-    // API OTX
-    $url = "https://otx.alienvault.com/api/v1/indicators/IPv4/{$ip}/passive_dns";
-    $response = @file_get_contents($url, false, $context);
+    $response = curl_exec($ch);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
 
-    if ($response === false) {
-        throw new Exception("Gagal mengambil data dari AlienVault", 500);
+    if ($httpCode != 200) {
+        throw new Exception("HTTP error! status: $httpCode. Response: $response", $httpCode);
     }
 
-    // Cek apakah respons berisi HTML (rate limit / error page)
-    if (stripos($response, '<!DOCTYPE') !== false || stripos($response, '<html') !== false) {
-        throw new Exception("AlienVault merespons HTML (kemungkinan rate limit / block)", 429);
-    }
-
-    // Decode JSON
     $data = json_decode($response, true);
-    if (json_last_error() !== JSON_ERROR_NONE) {
-        throw new Exception("Response API bukan JSON valid", 502);
+
+    if (!$data || !isset($data['passive_dns'])) {
+        throw new Exception("No data found for input: $input", 404);
     }
 
-    // Ambil hostnames unik
-    $hostnames = [];
-    if (!empty($data['passive_dns'])) {
-        foreach ($data['passive_dns'] as $item) {
-            if (!empty($item['hostname'])) {
-                $hostnames[] = $item['hostname'];
-            }
-        }
-    }
+    $domains = array_column($data['passive_dns'], 'hostname');
+    $domains = array_unique($domains);
 
     echo json_encode([
-        'status'    => 'success',
-        'ip'        => $ip,
-        'hostnames' => array_values(array_unique($hostnames)),
+        'success' => true,
+        'input' => $input,
+        'count' => count($domains),
+        'domains' => array_values($domains)
     ], JSON_PRETTY_PRINT);
 
 } catch (Exception $e) {
     http_response_code($e->getCode() ?: 500);
     echo json_encode([
-        'status'  => 'error',
-        'message' => $e->getMessage(),
-        'details' => isset($response)
-            ? (preg_match('/<html/i', $response) ? 'HTML response dari server' : substr($response, 0, 120))
-            : ''
+        'success' => false,
+        'error' => $e->getMessage()
     ], JSON_PRETTY_PRINT);
-}}
+}
