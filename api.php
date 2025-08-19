@@ -16,34 +16,37 @@ try {
         throw new Exception('Input bukan IP/domain valid', 400);
     }
 
-    // Gunakan user-agent untuk mengurangi blokir
+    // Context dengan user-agent + timeout
     $options = [
         'http' => [
-            'method' => 'GET',
-            'header' => "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36\r\n"
+            'method'  => 'GET',
+            'header'  => "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+                       . "(KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36\r\n",
+            'timeout' => 10
         ]
     ];
     $context = stream_context_create($options);
 
-    // URL API dengan timeout lebih pendek
+    // API OTX
     $url = "https://otx.alienvault.com/api/v1/indicators/IPv4/{$ip}/passive_dns";
-    $response = file_get_contents($url, false, $context);
+    $response = @file_get_contents($url, false, $context);
 
     if ($response === false) {
         throw new Exception("Gagal mengambil data dari AlienVault", 500);
     }
 
-    // Periksa apakah respons adalah HTML (error)
-    if (strpos($response, '<!DOCTYPE html>') === 0) {
-        throw new Exception("AlienVault merespons dengan halaman HTML (mungkin rate limit)", 429);
+    // Cek apakah respons berisi HTML (rate limit / error page)
+    if (stripos($response, '<!DOCTYPE') !== false || stripos($response, '<html') !== false) {
+        throw new Exception("AlienVault merespons HTML (kemungkinan rate limit / block)", 429);
     }
 
+    // Decode JSON
     $data = json_decode($response, true);
     if (json_last_error() !== JSON_ERROR_NONE) {
         throw new Exception("Response API bukan JSON valid", 502);
     }
 
-    // Proses data
+    // Ambil hostnames unik
     $hostnames = [];
     if (!empty($data['passive_dns'])) {
         foreach ($data['passive_dns'] as $item) {
@@ -54,16 +57,18 @@ try {
     }
 
     echo json_encode([
-        'status' => 'success',
-        'ip' => $ip,
+        'status'    => 'success',
+        'ip'        => $ip,
         'hostnames' => array_values(array_unique($hostnames)),
     ], JSON_PRETTY_PRINT);
 
 } catch (Exception $e) {
     http_response_code($e->getCode() ?: 500);
     echo json_encode([
-        'status' => 'error',
+        'status'  => 'error',
         'message' => $e->getMessage(),
-        'details' => isset($response) ? substr($response, 0, 100) : '' // Debug
+        'details' => isset($response)
+            ? (preg_match('/<html/i', $response) ? 'HTML response dari server' : substr($response, 0, 120))
+            : ''
     ], JSON_PRETTY_PRINT);
-}
+}}
