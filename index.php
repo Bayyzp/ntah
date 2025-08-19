@@ -109,7 +109,7 @@
                                     <button id="copyResults" class="btn btn-sm btn-outline-secondary me-2">
                                         <i class="fas fa-copy"></i> Copy
                                     </button>
-                                    <a id="downloadResults" href="#" class="btn btn-sm btn-primary">
+                                    <a id="downloadResults" href="download.php" class="btn btn-sm btn-primary">
                                         <i class="fas fa-download"></i> Download
                                     </a>
                                 </div>
@@ -124,7 +124,7 @@
                             <div id="fullResults" class="full-results"></div>
                             
                             <div class="mt-3 text-muted small">
-                                <i class="fas fa-info-circle"></i> Data provided by <a href="https://otx.alienvault.com" target="_blank">AlienVault OTX</a>
+                                <i class="fas fa-info-circle"></i> Data provided by <a href="https://nekopoi.care/" target="_blank">codexbay</a>
                             </div>
                         </div>
                     </div>
@@ -136,7 +136,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // DOM Elements
+            // js dom
             const form = document.getElementById('lookupForm');
             const input = document.getElementById('inputValue');
             const loading = document.getElementById('loading');
@@ -151,11 +151,9 @@
             const copyResults = document.getElementById('copyResults');
             const fullResults = document.getElementById('fullResults');
             
-            // State
             let currentDomains = [];
             let originalInput = '';
 
-            // Helper functions
             function showLoading() {
                 loading.style.display = 'block';
                 error.classList.add('d-none');
@@ -172,7 +170,6 @@
                 hideLoading();
             }
 
-            // Form submission handler
             form.addEventListener('submit', async function(e) {
                 e.preventDefault();
                 originalInput = input.value.trim();
@@ -209,18 +206,15 @@
                 }
             });
 
-            // Display results function
+            // result fungsi
             function displayResults(data) {
                 currentDomains = data.domains;
                 resultCount.textContent = data.count;
                 resultIp.textContent = data.ip;
                 
-                // Show original input if it was a domain
                 resultDomain.textContent = originalInput !== data.ip 
                     ? `(Resolved from: ${originalInput})` 
                     : '';
-                
-                // Display domains
                 const displayDomains = data.domains.slice(0, 20);
                 let html = displayDomains.map(domain => 
                     `<div class="domain-item">${domain}</div>`
@@ -234,7 +228,7 @@
                 
                 domainList.innerHTML = html;
                 fullResults.textContent = data.domains.join('\n');
-                downloadResults.href = data.download_url || '#';
+                downloadResults.href = 'download.php?ip=' + encodeURIComponent(data.ip);
                 results.classList.remove('d-none');
                 hideLoading();
             }
