@@ -2,17 +2,23 @@
 header('Content-Type: application/json');
 
 try {
-    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    // Bisa lewat GET atau POST
+    $method = $_SERVER['REQUEST_METHOD'];
+    if ($method === 'POST') {
+        $input = $_POST['input'] ?? null;
+    } elseif ($method === 'GET') {
+        $input = $_GET['input'] ?? null;
+    } else {
         throw new Exception("Invalid request method", 405);
     }
 
-    if (!isset($_POST['input']) || empty($_POST['input'])) {
+    if (!$input || empty(trim($input))) {
         throw new Exception("Input is required", 400);
     }
 
-    $input = trim($_POST['input']);
+    $input = trim($input);
 
-    // kasi validasi user input domain ato ip ler
+    // validasi domain atau IP
     if (filter_var($input, FILTER_VALIDATE_IP)) {
         $url = "https://otx.alienvault.com/api/v1/indicators/IPv4/{$input}/passive_dns";
     } else {
