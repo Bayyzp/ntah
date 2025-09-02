@@ -26,7 +26,7 @@ color: black;
   <br><br><br><br><br><br>
   <img class="rotating" src="https://g.top4top.io/p_3500jw0nw0.gif" alt="Rotating Image">
 <br><br>
-<h3><i><font style="color: black; text-shadow: 4px 4px 4px red;" color="black" size="50">./Ayamjago</font></i>
+<h3><i><font style="color: black; text-shadow: 4px 4px 4px red;" color="black" size="50">*Hacked by ./Ayamjago</font></i>
 <i><br><br><font style="background-color: black; color: white; text-shadow: 4px 4px 4px red; font-size: 50px;">
   BLACK CYBER ILLUSION.
 </font></i></h3>
