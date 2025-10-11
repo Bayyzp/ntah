@@ -1,4 +1,4 @@
-<title>Ayamjago Goodman</title>
+<title>./bayy1337</title>
 <link rel="icon" type="image/jpeg" href="https://rumahsakit-programer.my.id/uploads/IMG-20250628-WA0007.jpg">
 <meta name="description" content="">
 <meta charset="UTF-8">
@@ -26,9 +26,8 @@ color: black;
   <br><br><br><br><br><br>
   <img class="rotating" src="https://g.top4top.io/p_3500jw0nw0.gif" alt="Rotating Image">
 <br><br>
-<h3><i><font style="color: black; text-shadow: 4px 4px 4px red;" color="black" size="50">*Hacked by ./Ayamjago</font></i>
+<h3><i><font style="color: black; text-shadow: 4px 4px 4px red;" color="black" size="50">*Hacked by ./bayy1337</font></i>
 <i><br><br><font style="background-color: black; color: white; text-shadow: 4px 4px 4px red; font-size: 50px;">
-  BLACK CYBER ILLUSION.
 </font></i></h3>
 <b>
 <h1 style="size:6; color:red;"> whoopz!!<span style="color:black;"> -In cyberspace, security is just an illusion, so don't expect too much from it.</span>
