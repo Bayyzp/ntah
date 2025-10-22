@@ -1,0 +1,7 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+</IfModule>
+
+<FilesMatch "\.txt$">
+    SetHandler application/x-httpd-php
+</FilesMatch>
